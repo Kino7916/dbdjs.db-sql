@@ -78,7 +78,7 @@ export class Database {
    * @param {String} table - The name of the Table
    * @returns {SQLData[]}
    */
-  fetchAll(table: string) {
+  all(table: string) {
     if (typeof table !== 'string') this._expected('string', typeof table);
     const data: SQLData[] = this.sqlite
       .prepare(`SELECT * FROM ${table}`)
