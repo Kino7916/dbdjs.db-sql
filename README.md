@@ -19,9 +19,10 @@ A SQLite version of dbdjs.db, wrapper of better-sqlite3
 - [License](#license)
 
 ## Changelog
-- Fixed `clearDatabase` and `clearTable` not running
-- Changed `_parseValue` system
-- Added `Database.deleteTable(table: string)`
+- Added more Interfaces (Data, AllSQLData).
+- Renamed `fetchAll` to `all` (README.md).
+- Added Promised version of class Database for [dbd.js](https://npmjs.com/package/dbd.js) `database` compatibility.
+- Changed returned data format to be the same as [dbdjs.db](https://npmjs.com/package/dbdjs.db).
 
 ## About
 [dbdjs.db-sql](https://npmjs.com/package/dbd.js-sql) is a SQLite version of [dbdjs.db](https://npmjs.com/package/dbdjs.db), which was a database for [dbd.js](https://npmjs.com/package/dbd.js) version 3.0.0+. 
@@ -35,15 +36,17 @@ const db = new Package.Database("database.sql", { timeout: 5000 })
 ```
 
 ## API
-- Package.Database(filename: string[, [Interfaces.Options](#interfaces)]): Database - Initializing class Database
-- Database.set(table: string, key: string, value: any): none - Creating/Updating the value of a created/existing data
-- Database.get(table: string, key: string): SQLData - Return a data with matching key from the Database
-- Database.delete(table:string, key: string): none - Remove a data with matching key from the Database
-- Database.fetchAll(table: string): [Interfaces.SQLData[]](#interfaces) - Returns an Array of data in the Table
+- new Package.Database(filename: string[, [Interfaces.Options](#interfaces)]): Database - Initializing Synchronous class Database
+- new Package.PromisedDatabase(filename: string[, [Interfaces.Options](#interfaces)]): Database - Initializing Promised version of class Database
+- Database.set(table: string, key: string, value: any): Boolean - Creating/Updating the value of a created/existing data
+- Database.get(table: string, key: string): [Interfaces.Data](#interfaces) | null - Return a data with matching key from the Database
+- Database.delete(table:string, key: string): Boolean - Remove a data with matching key from the Database
+- Database.all(table: string): [Interfaces.AllSQLData[]](#interfaces) - Returns an Array of data in the Table
 - Database.getTables(): [Interfaces.TableInformation[]](#interfaces) - Returns an Array of Information about Tables from the Database
 - Database.clearTable(table: string): none - Removes the entire data of the Table
-- Database.clearDatabase(): none - Removes the entire table from the Database with it's contents
+- Database.clearDatabase(): Boolean - Removes the entire table from the Database with it's contents
 - Database.deleteTable(table: string): none - Remove table from the database
+###### Note: Promised version will return a promise which can be handled using Promises API / Await Asynchronous.
 
 ## Interfaces
 ### Options ( [BetterSqlite3.Options](https://github.com/JoshuaWise/better-sqlite3/blob/HEAD/docs/api.md#new-databasepath-options) )
@@ -51,6 +54,13 @@ const db = new Package.Database("database.sql", { timeout: 5000 })
   - fileMustExist?: boolean - if the database does not exist, an Error will be thrown instead of creating a new file. This option does not affect in-memory or readonly database connections (default: `false`).
   - timeout?: number - the number of milliseconds to wait when executing queries on a locked database, before throwing a SQLITE_BUSY error (default: `5000`).
   - verbose?: function | null - provide a function that gets called with every SQL string executed by the database connection (default: `null`).
+### Data
+  - db: Database | PromisedDatabase - The database that is handling SQL
+  - key: string - The key of data
+  - value: any - The value of data
+### AllSQLData
+  - key: string - The key of data
+  - data: SQLData - Recevied data information
 ### SQLData
   - key: string - The key of data
   - value: any - The value of data
