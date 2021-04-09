@@ -1,5 +1,4 @@
 const database = require("./src/index.js")
 const db = new database.Database("database.sql")
 
-db.set("users", "Kino", {hello:"World"})
-console.log(db.get("users", "Kino"))
+console.log(db.get("users", "kino", "test"))

@@ -19,7 +19,9 @@ A SQLite version of dbdjs.db, wrapper of better-sqlite3
 - [License](#license)
 
 ## Changelog
-- Renamed Database method `fetchAll` to `all`
+- Fixed `clearDatabase` and `clearTable` not running
+- Changed `_parseValue` system
+- Added `Database.deleteTable(table: string)`
 
 ## About
 [dbdjs.db-sql](https://npmjs.com/package/dbd.js-sql) is a SQLite version of [dbdjs.db](https://npmjs.com/package/dbdjs.db), which was a database for [dbd.js](https://npmjs.com/package/dbd.js) version 3.0.0+. 
@@ -41,6 +43,7 @@ const db = new Package.Database("database.sql", { timeout: 5000 })
 - Database.getTables(): [Interfaces.TableInformation[]](#interfaces) - Returns an Array of Information about Tables from the Database
 - Database.clearTable(table: string): none - Removes the entire data of the Table
 - Database.clearDatabase(): none - Removes the entire table from the Database with it's contents
+- Database.deleteTable(table: string): none - Remove table from the database
 
 ## Interfaces
 ### Options ( [BetterSqlite3.Options](https://github.com/JoshuaWise/better-sqlite3/blob/HEAD/docs/api.md#new-databasepath-options) )

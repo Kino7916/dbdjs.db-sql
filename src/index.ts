@@ -1,6 +1,10 @@
 import LocalSqlite = require('better-sqlite3');
-import JSON = globalThis.JSON;
 
+/* Time to Live update */
+export interface TimeToLive {
+  START: Date | number;
+  END: Date | number;
+}
 export interface SQLData {
   key: string;
   value: string | number | any;
@@ -55,12 +59,13 @@ export class Database {
     if (typeof table !== 'string') this._expected('string', typeof table);
     if (typeof key !== 'string') this._expected('string', typeof key);
 
+    this._createTable(table);
     const data: SQLRawData = this.sqlite.prepare(`SELECT * FROM ${table} WHERE MAIN_KEY = ?`).get(key);
-    return this._parseValue(data.VALUE);
+    return this._parseValue(data);
   }
 
   /**
-   * Deletes a data from Database
+   * Remove a data from Database
    * @method
    * @param {String} table - The name of the table
    * @param {String} key - The name of the data
@@ -69,6 +74,7 @@ export class Database {
     if (typeof table !== 'string') this._expected('string', typeof table);
     if (typeof key !== 'string') this._expected('string', typeof key);
 
+    this._createTable(table);
     this.sqlite.prepare(`DELETE FROM ${table} WHERE MAIN_KEY = ? LIMIT 1`).run(key);
   }
 
@@ -80,6 +86,7 @@ export class Database {
    */
   all(table: string) {
     if (typeof table !== 'string') this._expected('string', typeof table);
+    this._createTable(table);
     const data: SQLData[] = this.sqlite
       .prepare(`SELECT * FROM ${table}`)
       .all()
@@ -87,15 +94,17 @@ export class Database {
         const sqldata: SQLRawData = f;
         const obj: SQLData = { key: '', value: '' };
         obj.key = sqldata.MAIN_KEY;
-        obj.value = this._parseValue(sqldata.VALUE);
+        obj.value = this._parseValue(sqldata);
         return obj;
       });
+
+    if (!data.length) this._deleteTableIfEmpty(table);
 
     return data;
   }
 
   /**
-   * Deletes the entire Tables with its contents from the Database
+   * Removes the entire Tables with its contents from the Database
    */
   clearDatabase() {
     const tables = this.sqlite
@@ -104,18 +113,28 @@ export class Database {
       .map((d) => d.name);
 
     for (const t of tables) {
-      this.sqlite.prepare(`DROP TABLE ${t}`);
+      this.sqlite.prepare(`DROP TABLE ${t}`).run();
     }
   }
 
   /**
-   * Deletes the entire data from the Table
+   * Removes the entire data from the Table
    * @method
    * @param {String} table - The name of the table
    */
   clearTable(table: string) {
     if (typeof table !== 'string') this._expected('string', typeof table);
-    this.sqlite.prepare(`DELETE FROM ${table}`);
+    this.sqlite.prepare(`DELETE FROM ${table}`).run();
+  }
+
+  /**
+   * Remove the table from the database
+   * @method
+   * @param {String} table - The name of the table
+   */
+  deleteTable(table: string) {
+    if (typeof table !== 'string') this._expected('string', typeof table);
+    this.sqlite.prepare(`DROP TABLE ${table}`).run();
   }
 
   /**
@@ -146,6 +165,11 @@ export class Database {
     this.sqlite.prepare(`CREATE TABLE IF NOT EXISTS ${table} (MAIN_KEY TEXT, VALUE BLOB)`).run();
   }
 
+  _deleteTableIfEmpty(table: string) {
+    if (typeof table !== 'string') this._expected('string', typeof table);
+    this.sqlite.prepare(`DROP TABLE IF EXISTS ${table}`).run();
+  }
+
   _insertIntoWithWhere(table: string, column: string, value: any) {
     if (typeof table !== 'string') this._expected('string', typeof table);
     if (typeof column !== 'string') this._expected('string', typeof column);
@@ -154,13 +178,13 @@ export class Database {
       .run(typeof value === 'object' || Array.isArray(value) ? JSON.stringify(value) : value, column);
   }
 
-  _parseValue(value: string | number | any) {
+  _parseValue(value: SQLRawData) {
     if (!value) return null;
 
-    if (typeof value === 'string') {
-      return JSON.parse(value);
+    if (typeof value.VALUE === 'string') {
+      return JSON.parse(value.VALUE);
     } else {
-      return value;
+      return value.VALUE;
     }
   }
 }
