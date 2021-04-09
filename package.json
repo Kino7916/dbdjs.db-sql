@@ -1,6 +1,6 @@
 {
   "name": "dbdjs.db-sql",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A like package of dbdjs.db with better-sqlite3 wrapper.",
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
